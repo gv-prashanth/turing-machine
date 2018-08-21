@@ -26,7 +26,7 @@ public class TuringMachineController {
 
 	private Map<String, TuringMachine> activeMachines;
 
-	private static final int CLEANUP_FREQUENCY = 60 * 60 * 1000; // ms
+	private static final int CLEANUP_FREQUENCY = 30 * 60 * 1000; // ms
 
 	@RequestMapping(method = RequestMethod.POST, value = "/turningMachine")
 	public String createTuringMachine(@RequestBody JsonNode tableInfo) {

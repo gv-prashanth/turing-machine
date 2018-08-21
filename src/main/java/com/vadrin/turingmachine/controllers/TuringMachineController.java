@@ -38,12 +38,20 @@ public class TuringMachineController {
 	 */
 
 	@RequestMapping(method = RequestMethod.POST, value = "/turningMachine")
-	public String createTuringMachine(@RequestBody JsonNode machineInfo) {
-		TuringMachine thisMachine = constructMachineUsingTableInfo(machineInfo);
-		String id = UUID.randomUUID().toString();
-		activeMachines.put(id, thisMachine);
-		log.info("Constructed new machine {}", id);
-		return id;
+	public Map<String, String> createTuringMachine(@RequestBody JsonNode machineInfo) {
+		Map<String, String> toReturn = new HashMap<String, String>();
+		try {
+			TuringMachine thisMachine = constructMachineUsingTableInfo(machineInfo);
+			String id = UUID.randomUUID().toString();
+			activeMachines.put(id, thisMachine);
+			log.info("Constructed new machine {}", id);
+			toReturn.put("machineId", id);
+		} catch (Exception e) {
+			log.error("Exception has occured ", e);
+			toReturn.put("Exception",
+					"Invalid Input. Please see sample at https://github.com/gv-prashanth/turning-machine");
+		}
+		return toReturn;
 	}
 
 	private TuringMachine constructMachineUsingTableInfo(JsonNode machineInfo) {

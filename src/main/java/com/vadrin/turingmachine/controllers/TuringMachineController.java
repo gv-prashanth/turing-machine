@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vadrin.turingmachine.commons.InsufficientTapeException;
 import com.vadrin.turingmachine.commons.InvalidOrTerminatedMachineException;
 import com.vadrin.turingmachine.models.ActionRow;
 import com.vadrin.turingmachine.models.ActionTable;
@@ -30,38 +29,58 @@ public class TuringMachineController {
 
 	private Map<String, TuringMachine> activeMachines;
 
+	// Sample Request
+	/*
+	 * { "tapeSize": "10", "actionTable": [ { "initialState": 0,
+	 * "initialSymbol": " ", "finalState": 1, "finalSymbol": "0", "moveTo": "R"
+	 * }, { "initialState": 1, "initialSymbol": " ", "finalState": 0,
+	 * "finalSymbol": "1", "moveTo": "R" } ] }
+	 */
+
 	@RequestMapping(method = RequestMethod.POST, value = "/turningMachine")
-	public String createTuringMachine(@RequestBody JsonNode tableInfo) {
-		ActionRow[] actionRow = new ActionRow[2];
-		actionRow[0] = new ActionRow(0, ' ', 1, '0', 'R');
-		actionRow[1] = new ActionRow(1, ' ', 0, '1', 'R');
-		ActionTable actionTable = new ActionTable(actionRow);
-		Tape tape = new Tape(10);
-		TuringMachine thisMachine = new TuringMachine(actionTable, tape);
+	public String createTuringMachine(@RequestBody JsonNode machineInfo) {
+		TuringMachine thisMachine = constructMachineUsingTableInfo(machineInfo);
 		String id = UUID.randomUUID().toString();
 		activeMachines.put(id, thisMachine);
 		log.info("Constructed new machine {}", id);
 		return id;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/turningMachine/{id}")
-	public String getTuringMachine(@PathVariable("id") String id) {
-		try {
-			if (!activeMachines.containsKey(id)) {
-				throw new InvalidOrTerminatedMachineException();
-			}
-			TuringMachine thisMachine = activeMachines.get(id);
-			thisMachine.computeSingleStep();
-			return thisMachine.toString();
-		} catch (InvalidOrTerminatedMachineException | InsufficientTapeException e) {
-			log.info("Destroying machine {} incase it is still not cleaned up", id);
-			activeMachines.remove(id);
-			return e.getClass().getName().split("\\.")[e.getClass().getName().split("\\.").length - 1];
-		} catch (Exception e) {
-			log.error("Unknown Exception", e);
-			activeMachines.remove(id);
-			return e.getClass().getName().split("\\.")[e.getClass().getName().split("\\.").length - 1];
+	private TuringMachine constructMachineUsingTableInfo(JsonNode machineInfo) {
+		ActionRow[] actionRow = new ActionRow[machineInfo.get("actionTable").size()];
+		for (int i = 0; i < machineInfo.get("actionTable").size(); i++) {
+			actionRow[i] = new ActionRow(machineInfo.get("actionTable").get(i).get("initialState").asInt(),
+					machineInfo.get("actionTable").get(i).get("initialSymbol").asText().charAt(0),
+					machineInfo.get("actionTable").get(i).get("finalState").asInt(),
+					machineInfo.get("actionTable").get(i).get("finalSymbol").asText().charAt(0),
+					machineInfo.get("actionTable").get(i).get("moveTo").asText().charAt(0));
 		}
+		ActionTable actionTable = new ActionTable(actionRow);
+		Tape tape = new Tape(machineInfo.get("tapeSize").asInt());
+		return new TuringMachine(actionTable, tape);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/turningMachine/{id}")
+	public Map<String, String> getTuringMachine(@PathVariable("id") String id) {
+		Map<String, String> toReturn = new HashMap<String, String>();
+		try {
+			TuringMachine thisMachine = fetchMachine(id);
+			thisMachine.computeSingleStep();
+			toReturn.put("Tape", thisMachine.toString());
+			toReturn.put("Head", String.valueOf(thisMachine.headPosition()));
+		} catch (Exception e) {
+			log.error("Exception has occured ", e);
+			activeMachines.remove(id);
+			toReturn.put("Exception", e.getClass().getName());
+		}
+		return toReturn;
+	}
+
+	private TuringMachine fetchMachine(String id) throws InvalidOrTerminatedMachineException {
+		if (!activeMachines.containsKey(id)) {
+			throw new InvalidOrTerminatedMachineException();
+		}
+		return activeMachines.get(id);
 	}
 
 	@PostConstruct

@@ -48,4 +48,8 @@ public class TuringMachine {
 		return toReturn;
 	}
 
+	public int headPosition() {
+		return this.head.getPosition();
+	}
+
 }

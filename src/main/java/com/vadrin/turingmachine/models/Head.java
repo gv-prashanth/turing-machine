@@ -30,4 +30,9 @@ public class Head {
 	public void writeToTape(Tape tape, char chartowrite) {
 		tape.setSymbolAt(position, chartowrite);
 	}
+
+	public int getPosition() {
+		return position;
+	}
+
 }

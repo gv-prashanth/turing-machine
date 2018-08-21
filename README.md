@@ -1,8 +1,5 @@
 # Turning-machine
-A Turing machine implementation in Java
-
-# Website
-You can play around at <a href="http://localhost"> Turing Machine </a>
+A Turing machine implementation in Java. You can play around at <a href="http://localhost"> Turing Machine </a>
 
 # REST Endpoints
 ## Construct a Turing Machine

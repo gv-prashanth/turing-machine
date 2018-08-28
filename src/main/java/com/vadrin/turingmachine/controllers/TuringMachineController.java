@@ -1,5 +1,6 @@
 package com.vadrin.turingmachine.controllers;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,6 +9,8 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vadrin.turingmachine.commons.InsufficientTapeException;
 import com.vadrin.turingmachine.commons.InvalidOrTerminatedMachineException;
 import com.vadrin.turingmachine.models.ActionRow;
 import com.vadrin.turingmachine.models.ActionTable;
@@ -38,20 +42,52 @@ public class TuringMachineController {
 	 */
 
 	@RequestMapping(method = RequestMethod.POST, value = "/turningMachine")
-	public Map<String, String> createTuringMachine(@RequestBody JsonNode machineInfo) {
-		Map<String, String> toReturn = new HashMap<String, String>();
+	public ResponseEntity<Map<String, String>> createTuringMachine(@RequestBody JsonNode machineInfo) {
 		try {
 			TuringMachine thisMachine = constructMachineUsingTableInfo(machineInfo);
 			String id = UUID.randomUUID().toString();
 			activeMachines.put(id, thisMachine);
 			log.info("Constructed new machine {}", id);
-			toReturn.put("machineId", id);
+			return ResponseEntity.created(new URI("/turningMachine/" + id)).build();
 		} catch (Exception e) {
 			log.error("Exception has occured ", e);
+			Map<String, String> toReturn = new HashMap<String, String>();
 			toReturn.put("Exception",
 					"Invalid Input. Please see sample at https://github.com/gv-prashanth/turning-machine");
+			return ResponseEntity.badRequest().body(toReturn);
 		}
-		return toReturn;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/turningMachine/{id}")
+	public ResponseEntity<Map<String, String>> getTuringMachine(@PathVariable("id") String id) {
+		Map<String, String> toReturn = new HashMap<String, String>();
+		try {
+			TuringMachine thisMachine = fetchMachine(id);
+			thisMachine.computeSingleStep();
+			toReturn.put("Tape", thisMachine.toString());
+			toReturn.put("Head", String.valueOf(thisMachine.headPosition()));
+			return ResponseEntity.ok(toReturn);
+		} catch (InsufficientTapeException e) {
+			log.error("Exception has occured ", e);
+			activeMachines.remove(id);
+			toReturn.put("Exception", "Insufficient Tape. This Machine will Self Terminate now.");
+			return ResponseEntity.badRequest().body(toReturn);
+		} catch (InvalidOrTerminatedMachineException e) {
+			log.error("Exception has occured ", e);
+			toReturn.put("Exception", "Not a valid Machine.");
+			return ResponseEntity.status(HttpStatus.GONE).body(toReturn);
+		}
+	}
+
+	@PostConstruct
+	private void init() {
+		activeMachines = new HashMap<String, TuringMachine>();
+	}
+
+	@Scheduled(fixedDelayString = "${com.vadrin.turing-machine.cleanupFrequency}")
+	private void clearAllActiveMachines() {
+		log.info("Cleaning up the machines...");
+		activeMachines = new HashMap<String, TuringMachine>();
 	}
 
 	private TuringMachine constructMachineUsingTableInfo(JsonNode machineInfo) {
@@ -68,38 +104,11 @@ public class TuringMachineController {
 		return new TuringMachine(actionTable, tape);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/turningMachine/{id}")
-	public Map<String, String> getTuringMachine(@PathVariable("id") String id) {
-		Map<String, String> toReturn = new HashMap<String, String>();
-		try {
-			TuringMachine thisMachine = fetchMachine(id);
-			thisMachine.computeSingleStep();
-			toReturn.put("Tape", thisMachine.toString());
-			toReturn.put("Head", String.valueOf(thisMachine.headPosition()));
-		} catch (Exception e) {
-			log.error("Exception has occured ", e);
-			activeMachines.remove(id);
-			toReturn.put("Exception", e.getClass().getName());
-		}
-		return toReturn;
-	}
-
 	private TuringMachine fetchMachine(String id) throws InvalidOrTerminatedMachineException {
 		if (!activeMachines.containsKey(id)) {
 			throw new InvalidOrTerminatedMachineException();
 		}
 		return activeMachines.get(id);
-	}
-
-	@PostConstruct
-	private void init() {
-		activeMachines = new HashMap<String, TuringMachine>();
-	}
-
-	@Scheduled(fixedDelayString = "${com.vadrin.turing-machine.cleanupFrequency}")
-	private void clearAllActiveMachines() {
-		log.info("Cleaning up the machines...");
-		activeMachines = new HashMap<String, TuringMachine>();
 	}
 
 }

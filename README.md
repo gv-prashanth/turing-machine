@@ -1,4 +1,4 @@
-# Turning-machine
+# turning-machine
 A Turing machine implementation in Java. You can play around at <a href="http://localhost"> Turing Machine </a>
 
 ## Construct a Turing Machine

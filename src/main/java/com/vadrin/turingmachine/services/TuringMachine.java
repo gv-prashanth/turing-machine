@@ -40,7 +40,7 @@ public class TuringMachine {
 		String toReturn = "";
 		for (int i = 0; i < tape.getTapeSize(); i++) {
 			if (tape.getSymbolAt(i) == ' ') {
-				toReturn = toReturn + "*";
+				toReturn = toReturn + " ";
 			} else {
 				toReturn = toReturn + tape.getSymbolAt(i);
 			}

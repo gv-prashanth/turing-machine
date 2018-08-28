@@ -72,8 +72,8 @@ public class TuringMachineController {
 			toReturn.put("Exception", "Insufficient Tape. This Machine will Self Terminate now.");
 			return ResponseEntity.badRequest().body(toReturn);
 		} catch (InvalidOrTerminatedMachineException e) {
-			toReturn.put("Exception", "Machine is termiated.");
-			return ResponseEntity.status(HttpStatus.GONE).body(toReturn);
+			toReturn.put("Exception", "Machine not found.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(toReturn);
 		}
 	}
 

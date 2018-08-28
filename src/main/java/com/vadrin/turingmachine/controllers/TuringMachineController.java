@@ -74,7 +74,7 @@ public class TuringMachineController {
 			return ResponseEntity.badRequest().body(toReturn);
 		} catch (InvalidOrTerminatedMachineException e) {
 			log.error("Exception has occured ", e);
-			toReturn.put("Exception", "Not a valid Machine.");
+			toReturn.put("Exception", "Machine is termiated.");
 			return ResponseEntity.status(HttpStatus.GONE).body(toReturn);
 		}
 	}

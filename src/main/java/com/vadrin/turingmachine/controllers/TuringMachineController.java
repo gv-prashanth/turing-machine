@@ -1,6 +1,7 @@
 package com.vadrin.turingmachine.controllers;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -49,8 +50,7 @@ public class TuringMachineController {
 			activeMachines.put(id, thisMachine);
 			log.info("Constructed new machine {}", id);
 			return ResponseEntity.created(new URI("/turningMachine/" + id)).build();
-		} catch (Exception e) {
-			log.error("Exception has occured ", e);
+		} catch (NullPointerException | URISyntaxException e) {
 			Map<String, String> toReturn = new HashMap<String, String>();
 			toReturn.put("Exception",
 					"Invalid Input. Please see sample at https://github.com/gv-prashanth/turning-machine");
@@ -68,12 +68,10 @@ public class TuringMachineController {
 			toReturn.put("Head", String.valueOf(thisMachine.headPosition()));
 			return ResponseEntity.ok(toReturn);
 		} catch (InsufficientTapeException e) {
-			log.error("Exception has occured ", e);
 			activeMachines.remove(id);
 			toReturn.put("Exception", "Insufficient Tape. This Machine will Self Terminate now.");
 			return ResponseEntity.badRequest().body(toReturn);
 		} catch (InvalidOrTerminatedMachineException e) {
-			log.error("Exception has occured ", e);
 			toReturn.put("Exception", "Machine is termiated.");
 			return ResponseEntity.status(HttpStatus.GONE).body(toReturn);
 		}

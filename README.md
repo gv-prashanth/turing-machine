@@ -27,9 +27,7 @@ POST
 	]
 }
 ### Sample Response Body
-{
-    "machineId": "d447423d-2fe5-4d0c-a297-d9ec2dd9c7c8"
-}
+201 Status Code with location header containing the location of the newly created turing machine.
 
 ## Process the Turing Machine
 ### URL

@@ -27,7 +27,7 @@ POST
 	]
 }
 ### Sample Response Body
-201 Status Code with location header containing the location of the newly created turing machine.
+201 Status Code with location header containing the path of newly created turing machine.
 
 ## Process the Turing Machine
 ### URL

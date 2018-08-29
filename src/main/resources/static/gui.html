@@ -5,6 +5,8 @@
 <title>Turning Machine</title>
 <script>
 	var machineUrl = "";
+	var currentRuleNumber = 1;
+
 	function createMachine() {
 		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
 		xmlhttp.open("POST", "/turningMachine");
@@ -12,13 +14,49 @@
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 201) {
 				machineUrl = this.getResponseHeader("Location");
-				document.getElementById("manage").innerHTML = '<button type="button" onclick="runMachine()">Run a Step</button>';
+				document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="startMachine()">Start</button>';
 			}
 		};
-		xmlhttp
-				.send("{ \"tapeSize\": \"50\", \"actionTable\": [ { \"initialState\": 0, \"initialSymbol\": \" \", \"finalState\": 1, \"finalSymbol\": \"0\", \"moveTo\": \"R\" }, { \"initialState\": 1, \"initialSymbol\": \" \", \"finalState\": 0, \"finalSymbol\": \"1\", \"moveTo\": \"R\" } ] }");
+		xmlhttp.send(constructInputJsonFromUserRules());
 	}
-	function runMachine() {
+
+	function startMachine() {
+		disableScreen('input');
+		disableScreen('select');
+		setInterval(function() {
+			stepTheMachine();
+		}, 1000);
+	}
+
+	function constructInputJsonFromUserRules() {
+		var toReturn = new Object();
+		toReturn.tapeSize = 50;
+		toReturn.actionTable = [];
+		for (var i = 1; i < currentRuleNumber; i++) {
+			var actionRow = new Object();
+			actionRow.initialState = document.getElementById(i
+					+ "_initialState").value;
+			if (document.getElementById(i + "_initialSymbol").value) {
+				actionRow.initialSymbol = document.getElementById(i
+						+ "_initialSymbol").value;
+			} else {
+				actionRow.initialSymbol = " ";
+			}
+			actionRow.finalState = document.getElementById(i + "_finalState").value;
+			if (document.getElementById(i + "_finalSymbol").value) {
+				actionRow.finalSymbol = document.getElementById(i
+						+ "_finalSymbol").value;
+			} else {
+				actionRow.finalSymbol = " ";
+			}
+			actionRow.moveTo = document.getElementById(i + "_moveTo").value;
+			toReturn.actionTable[i - 1] = actionRow;
+		}
+		return JSON.stringify(toReturn);
+		//return "{ \"tapeSize\": \"50\", \"actionTable\": [ { \"initialState\": 0, \"initialSymbol\": \" \", \"finalState\": 1, \"finalSymbol\": \"0\", \"moveTo\": \"R\" }, { \"initialState\": 1, \"initialSymbol\": \" \", \"finalState\": 0, \"finalSymbol\": \"1\", \"moveTo\": \"R\" } ] }";
+	}
+
+	function stepTheMachine() {
 		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
 		xmlhttp.open("GET", machineUrl);
 		xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -27,7 +65,8 @@
 				var tape = JSON.parse(this.responseText).Tape.split("");
 				var head = JSON.parse(this.responseText).Head;
 				document.getElementById("runResult").innerHTML = "";
-				document.getElementById("runResult").appendChild(getTapeHtmlToPrint(tape, head));
+				document.getElementById("runResult").appendChild(
+						getTapeHtmlToPrint(tape, head));
 			} else if (this.readyState == 4 && this.status == 400) {
 				document.getElementById("runResult").innerHTML = "Insufficient Tape!";
 			} else {
@@ -36,26 +75,28 @@
 		};
 		xmlhttp.send();
 	}
-	function getTapeHtmlToPrint(tape, head){
+
+	function getTapeHtmlToPrint(tape, head) {
 		var tbl = document.createElement('table');
 		tbl.setAttribute('border', '1');
 		var tbdy = document.createElement('tbody');
 
-			var tr = document.createElement('tr');
-			for (var j = 0; j < tape.length; j++) {
-				var td = document.createElement('td');
-				td.setAttribute('width', '10');
-				if (head == j + 1) {
-					td.setAttribute('bgcolor', 'Tan');
-				}
-				td.innerHTML = tape[j];
-				tr.appendChild(td);
+		var tr = document.createElement('tr');
+		for (var j = 0; j < tape.length; j++) {
+			var td = document.createElement('td');
+			td.setAttribute('width', '10');
+			if (head == j + 1) {
+				td.setAttribute('bgcolor', 'Tan');
 			}
-			tbdy.appendChild(tr);
+			td.innerHTML = tape[j];
+			tr.appendChild(td);
+		}
+		tbdy.appendChild(tr);
 
 		tbl.appendChild(tbdy);
 		return tbl;
 	}
+
 	function addNewRule() {
 		var table = document.getElementById("myTable");
 		var row = table.insertRow(-1);
@@ -64,11 +105,19 @@
 		var finalState = row.insertCell(2);
 		var finalSymbol = row.insertCell(3);
 		var moveTo = row.insertCell(4);
-		initialState.innerHTML = "<center><input type='text' size='5'/></center>";
-		initialSymbol.innerHTML = "<center><input type='text' size='5'/></center>";
-		finalState.innerHTML = "<center><input type='text' size='5'/></center>";
-		finalSymbol.innerHTML = "<center><input type='text' size='5'/></center>";
-		moveTo.innerHTML = "<select><option value='L'>Left</option><option value='R'>Right</option></select>";
+		initialState.innerHTML = "<center><input type='text' size='5' id="+currentRuleNumber + "_initialState "+"/></center>";
+		initialSymbol.innerHTML = "<center><input type='text' size='5' id="+currentRuleNumber + "_initialSymbol "+"/></center>";
+		finalState.innerHTML = "<center><input type='text' size='5' id="+currentRuleNumber + "_finalState "+"/></center>";
+		finalSymbol.innerHTML = "<center><input type='text' size='5' id="+currentRuleNumber + "_finalSymbol "+"/></center>";
+		moveTo.innerHTML = "<select id="+currentRuleNumber + "_moveTo "+"><option value='R'>Right</option><option value='L'>Left</option></select>";
+		currentRuleNumber++;
+	}
+
+	function disableScreen(tagType) {
+		var elems = document.getElementsByTagName(tagType);
+		for (var i = 0; i < elems.length; i++) {
+			elems[i].disabled = true;
+		}
 	}
 </script>
 </head>
@@ -91,5 +140,7 @@
 	</div>
 	<br>
 	<div id="runResult"></div>
+	
+	<script>addNewRule();</script>
 </body>
 </html>

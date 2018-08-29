@@ -6,6 +6,7 @@
 <script>
 	var machineUrl = "";
 	var currentRuleNumber = 1;
+	var timer;
 
 	function createMachine() {
 		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
@@ -23,9 +24,17 @@
 	function startMachine() {
 		disableScreen('input');
 		disableScreen('select');
-		setInterval(function() {
+		timer = setInterval(function() {
 			stepTheMachine();
 		}, 1000);
+		document.getElementById("runMessage").innerHTML = "Running...";
+		document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="stopMachine()">Stop</button>';
+	}
+
+	function stopMachine() {
+		clearInterval(timer);
+		document.getElementById("runMessage").innerHTML = "Stopped.";
+		document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="startMachine()">Start</button>';
 	}
 
 	function constructInputJsonFromUserRules() {
@@ -67,10 +76,11 @@
 				document.getElementById("runResult").innerHTML = "";
 				document.getElementById("runResult").appendChild(
 						getTapeHtmlToPrint(tape, head));
+				document.getElementById("runMessage").innerHTML = "Running...";
 			} else if (this.readyState == 4 && this.status == 400) {
-				document.getElementById("runResult").innerHTML = "Insufficient Tape!";
-			} else {
-				document.getElementById("runResult").innerHTML = "Invalid Machine. Please refresh the page.";
+				document.getElementById("runMessage").innerHTML = "Insufficient Tape! This machine with self destruct";
+			} else if (this.readyState == 4 && this.status == 404) {
+				document.getElementById("runMessage").innerHTML = "Invalid Machine. Please refresh the page.";
 			}
 		};
 		xmlhttp.send();
@@ -140,7 +150,10 @@
 	</div>
 	<br>
 	<div id="runResult"></div>
-	
-	<script>addNewRule();</script>
+	<br>
+	<div id="runMessage"></div>
+	<script>
+		addNewRule();
+	</script>
 </body>
 </html>

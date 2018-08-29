@@ -36,6 +36,29 @@ http://localhost:8080/turningMachine/{machineId}
 GET
 ### Sample Response Body
 {
-    "Head": "22",
-    "Tape": "0101010101010101010101****************************"
+    "tape": {
+        "symbols": "0111111111"
+    },
+    "state": 1,
+    "head": {
+        "position": 1
+    },
+    "actionTable": {
+        "actionRows": [
+            {
+                "initialState": 0,
+                "initialSymbol": " ",
+                "finalState": 1,
+                "finalSymbol": "0",
+                "moveTo": "R"
+            },
+            {
+                "initialState": 1,
+                "initialSymbol": " ",
+                "finalState": 0,
+                "finalSymbol": "1",
+                "moveTo": "R"
+            }
+        ]
+    }
 }

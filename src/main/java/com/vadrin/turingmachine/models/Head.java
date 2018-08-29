@@ -12,7 +12,7 @@ public class Head {
 	}
 
 	public char readTape(Tape tape) {
-		return tape.getSymbolAt(position);
+		return tape.symbolAt(position);
 	}
 
 	public void moveHead(Tape tape, char direction) throws InsufficientTapeException {
@@ -22,13 +22,13 @@ public class Head {
 		if (direction == 'R') {
 			position++;
 		}
-		if (position >= (tape.getTapeSize())) {
+		if (position >= (tape.size())) {
 			throw new InsufficientTapeException();
 		}
 	}
 
 	public void writeToTape(Tape tape, char chartowrite) {
-		tape.setSymbolAt(position, chartowrite);
+		tape.writeSymbol(position, chartowrite);
 	}
 
 	public int getPosition() {

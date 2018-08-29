@@ -59,19 +59,18 @@ public class TuringMachineController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/turningMachine/{id}")
-	public ResponseEntity<Map<String, String>> getTuringMachine(@PathVariable("id") String id) {
-		Map<String, String> toReturn = new HashMap<String, String>();
+	public ResponseEntity<Object> getTuringMachine(@PathVariable("id") String id) {
 		try {
 			TuringMachine thisMachine = fetchMachine(id);
 			thisMachine.computeSingleStep();
-			toReturn.put("Tape", thisMachine.toString());
-			toReturn.put("Head", String.valueOf(thisMachine.headIndex() + 1));
-			return ResponseEntity.ok(toReturn);
+			return ResponseEntity.ok(thisMachine);
 		} catch (InsufficientTapeException e) {
 			activeMachines.remove(id);
+			Map<String, Object> toReturn = new HashMap<String, Object>();
 			toReturn.put("Exception", "Insufficient Tape. This Machine will Self Terminate now.");
 			return ResponseEntity.badRequest().body(toReturn);
 		} catch (InvalidOrTerminatedMachineException e) {
+			Map<String, Object> toReturn = new HashMap<String, Object>();
 			toReturn.put("Exception", "Machine not found.");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(toReturn);
 		}

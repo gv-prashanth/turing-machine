@@ -70,8 +70,8 @@
 		xmlhttp.setRequestHeader("Content-Type", "application/json");
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
-				var tape = JSON.parse(this.responseText).Tape.split("");
-				var head = JSON.parse(this.responseText).Head;
+				var tape = JSON.parse(this.responseText).tape.symbols.split("");
+				var head = 1 + JSON.parse(this.responseText).head.position;
 				document.getElementById("runResult").innerHTML = "";
 				document.getElementById("runResult").appendChild(
 						getTapeHtmlToPrint(tape, head));

@@ -24,8 +24,8 @@ public class TuringMachine {
 	public void computeSingleStep() throws InsufficientTapeException {
 		int currentstate = state;
 		char currentsymbol = head.readTape(tape);
-		for (int i = 0; i < actionTable.getNumberOfRows(); i++) {
-			ActionRow currentactionrow = actionTable.getActionRow(i);
+		for (int i = 0; i < actionTable.size(); i++) {
+			ActionRow currentactionrow = actionTable.fetch(i);
 			if ((currentactionrow.getInitialState() == currentstate)
 					&& (currentactionrow.getInitialSymbol() == currentsymbol)) {
 				state = currentactionrow.getFinalState();
@@ -35,21 +35,24 @@ public class TuringMachine {
 		}
 	}
 
-	@Override
-	public String toString() {
-		String toReturn = "";
-		for (int i = 0; i < tape.getTapeSize(); i++) {
-			if (tape.getSymbolAt(i) == ' ') {
-				toReturn = toReturn + " ";
-			} else {
-				toReturn = toReturn + tape.getSymbolAt(i);
-			}
-		}
-		return toReturn;
-	}
-
 	public int headIndex() {
 		return this.head.getPosition();
+	}
+
+	public ActionTable getActionTable() {
+		return actionTable;
+	}
+
+	public Tape getTape() {
+		return tape;
+	}
+
+	public int getState() {
+		return state;
+	}
+
+	public Head getHead() {
+		return head;
 	}
 
 }

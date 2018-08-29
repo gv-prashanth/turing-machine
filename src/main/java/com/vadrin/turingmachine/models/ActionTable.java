@@ -2,18 +2,23 @@ package com.vadrin.turingmachine.models;
 
 public class ActionTable {
 
-	private ActionRow[] actionRow;
+	private ActionRow[] actionRows;
 
-	public ActionTable(ActionRow[] actionRow) {
+	public ActionTable(ActionRow[] actionRows) {
 		super();
-		this.actionRow = actionRow;
+		this.actionRows = actionRows;
 	}
 
-	public int getNumberOfRows() {
-		return actionRow.length;
+	public int size() {
+		return actionRows.length;
 	}
 
-	public ActionRow getActionRow(int rownumber) {
-		return actionRow[rownumber];
+	public ActionRow fetch(int rownumber) {
+		return actionRows[rownumber];
 	}
+
+	public ActionRow[] getActionRows() {
+		return actionRows;
+	}
+
 }

@@ -65,7 +65,7 @@ public class TuringMachineController {
 			TuringMachine thisMachine = fetchMachine(id);
 			thisMachine.computeSingleStep();
 			toReturn.put("Tape", thisMachine.toString());
-			toReturn.put("Head", String.valueOf(thisMachine.headIndex()+1));
+			toReturn.put("Head", String.valueOf(thisMachine.headIndex() + 1));
 			return ResponseEntity.ok(toReturn);
 		} catch (InsufficientTapeException e) {
 			activeMachines.remove(id);

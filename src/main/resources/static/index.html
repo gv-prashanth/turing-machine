@@ -77,7 +77,8 @@
 						getTapeHtmlToPrint(tape, head));
 				document.getElementById("runMessage").innerHTML = "Running...";
 			} else if (this.readyState == 4 && this.status == 400) {
-				document.getElementById("runMessage").innerHTML = "Insufficient Tape! This machine with self destruct";
+				stopMachine();
+				document.getElementById("runMessage").innerHTML = "Insufficient Tape! This machine will self destruct";
 			} else if (this.readyState == 4 && this.status == 404) {
 				document.getElementById("runMessage").innerHTML = "Invalid Machine. Please refresh the page.";
 			}
@@ -153,6 +154,8 @@
 	<div id="runMessage"></div>
 	<script>
 		addNewRule();
+		document.getElementById("1_initialState").value = 0;
+		document.getElementById("1_initialState").disabled = true;
 	</script>
 </body>
 </html>

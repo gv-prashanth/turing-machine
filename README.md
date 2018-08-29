@@ -1,9 +1,9 @@
 # turning-machine
-A Turing machine implementation in Java. You can play around at <a href="http://localhost"> Turing Machine </a>
+A Turing machine implementation in Java. You can play around at <a href="https://turing-machine-sim.herokuapp.com"> Turing Machine </a>
 
 ## Construct a Turing Machine
 ### URL
-http://localhost:8080/turningMachine
+https://turing-machine-sim.herokuapp.com/turningMachine
 ### HttpMethod
 POST
 ### Request Body
@@ -31,7 +31,7 @@ POST
 
 ## Process the Turing Machine
 ### URL
-http://localhost:8080/turningMachine/{machineId}
+https://turing-machine-sim.herokuapp.com/turningMachine/{machineId}
 ### HttpMethod
 GET
 ### Sample Response Body

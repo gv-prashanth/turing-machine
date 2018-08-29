@@ -7,6 +7,7 @@
 	var machineUrl = "";
 	var currentRuleNumber = 1;
 	var timer;
+	var actionTableConstructed = false;
 
 	function createMachine() {
 		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
@@ -22,8 +23,6 @@
 	}
 
 	function startMachine() {
-		disableScreen('input');
-		disableScreen('select');
 		timer = setInterval(function() {
 			stepTheMachine();
 		}, 1000);
@@ -32,13 +31,13 @@
 
 	function stopMachine() {
 		clearInterval(timer);
-		document.getElementById("runMessage").innerHTML = "Stopped.";
+		document.getElementById("runMessage").innerHTML = "Stopped machine "
+				+ machineUrl.split("/")[2];
 		document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="startMachine()">Start</button>';
 	}
 
 	function constructInputJsonFromUserRules() {
 		var toReturn = new Object();
-		toReturn.tapeSize = 50;
 		toReturn.actionTable = [];
 		for (var i = 1; i < currentRuleNumber; i++) {
 			var actionRow = new Object();
@@ -61,7 +60,6 @@
 			toReturn.actionTable[i - 1] = actionRow;
 		}
 		return JSON.stringify(toReturn);
-		//return "{ \"tapeSize\": \"50\", \"actionTable\": [ { \"initialState\": 0, \"initialSymbol\": \" \", \"finalState\": 1, \"finalSymbol\": \"0\", \"moveTo\": \"R\" }, { \"initialState\": 1, \"initialSymbol\": \" \", \"finalState\": 0, \"finalSymbol\": \"1\", \"moveTo\": \"R\" } ] }";
 	}
 
 	function stepTheMachine() {
@@ -75,7 +73,11 @@
 				document.getElementById("runResult").innerHTML = "";
 				document.getElementById("runResult").appendChild(
 						getTapeHtmlToPrint(tape, head));
-				document.getElementById("runMessage").innerHTML = "Running...";
+				document.getElementById("runMessage").innerHTML = "Running machine "
+						+ machineUrl.split("/")[2];
+				var actionRows = JSON.parse(this.responseText).actionTable.actionRows;
+				constructBlankActionTableFromResponse(actionRows);
+				paintActionTableFromResponse(actionRows);
 			} else if (this.readyState == 4 && this.status == 400) {
 				stopMachine();
 				document.getElementById("runMessage").innerHTML = "Insufficient Tape! This machine will self destruct";
@@ -84,6 +86,27 @@
 			}
 		};
 		xmlhttp.send();
+		disableScreen('input');
+		disableScreen('select');
+	}
+
+	function constructBlankActionTableFromResponse(actionRows) {
+		if (getUrlVars()["id"] && !actionTableConstructed) {
+			for (var i = 0; i < actionRows.length; i++) {
+				addNewRule();
+			}
+			actionTableConstructed = true;
+		}
+	}
+
+	function paintActionTableFromResponse(actionRows) {
+		for (var i = 0; i < actionRows.length; i++) {
+			document.getElementById((i + 1) + "_initialState").value = actionRows[i].initialState;
+			document.getElementById((i + 1) + "_initialSymbol").value = actionRows[i].initialSymbol;
+			document.getElementById((i + 1) + "_finalState").value = actionRows[i].finalState;
+			document.getElementById((i + 1) + "_finalSymbol").value = actionRows[i].finalSymbol;
+			document.getElementById((i + 1) + "_moveTo").value = actionRows[i].moveTo;
+		}
 	}
 
 	function getTapeHtmlToPrint(tape, head) {
@@ -123,6 +146,15 @@
 		currentRuleNumber++;
 	}
 
+	function getUrlVars() {
+		var vars = {};
+		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+				function(m, key, value) {
+					vars[key] = value;
+				});
+		return vars;
+	}
+
 	function disableScreen(tagType) {
 		var elems = document.getElementsByTagName(tagType);
 		for (var i = 0; i < elems.length; i++) {
@@ -153,9 +185,14 @@
 	<br>
 	<div id="runMessage"></div>
 	<script>
-		addNewRule();
-		document.getElementById("1_initialState").value = 0;
-		document.getElementById("1_initialState").disabled = true;
+		if (getUrlVars()["id"]) {
+			machineUrl = "/turningMachine/" + getUrlVars()["id"];
+			document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="startMachine()">Start</button>';
+		} else {
+			addNewRule();
+			document.getElementById("1_initialState").value = 0;
+			document.getElementById("1_initialState").disabled = true;
+		}
 	</script>
 </body>
 </html>

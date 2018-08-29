@@ -31,7 +31,7 @@ import com.vadrin.turingmachine.services.TuringMachine;
 public class TuringMachineController {
 
 	private static final Logger log = LoggerFactory.getLogger(TuringMachineController.class);
-
+	private static final int DEFAULT_TAPE_SIZE = 100;
 	private Map<String, TuringMachine> activeMachines;
 
 	// Sample Request
@@ -97,7 +97,12 @@ public class TuringMachineController {
 					machineInfo.get("actionTable").get(i).get("moveTo").asText().charAt(0));
 		}
 		ActionTable actionTable = new ActionTable(actionRow);
-		Tape tape = new Tape(machineInfo.get("tapeSize").asInt());
+		Tape tape;
+		if (machineInfo.has("tapeSize")) {
+			tape = new Tape(machineInfo.get("tapeSize").asInt());
+		} else {
+			tape = new Tape(DEFAULT_TAPE_SIZE);
+		}
 		return new TuringMachine(actionTable, tape);
 	}
 

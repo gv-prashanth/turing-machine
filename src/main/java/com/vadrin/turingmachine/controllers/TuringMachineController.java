@@ -31,7 +31,7 @@ import com.vadrin.turingmachine.services.TuringMachine;
 public class TuringMachineController {
 
 	private static final Logger log = LoggerFactory.getLogger(TuringMachineController.class);
-	private static final int DEFAULT_TAPE_SIZE = 100;
+	private static final int DEFAULT_TAPE_SIZE = 50;
 	private Map<String, TuringMachine> activeMachines;
 
 	// Sample Request

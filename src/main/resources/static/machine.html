@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Turning Machine</title>
+<script>
+	var timer;
+	var running = false;
+	var currentRuleNumber = 1;
+	var actionTableConstructed = false;
+	
+	function editMachine(){
+		window.location.href = "/?id="+getUrlVars()["id"];
+	}
+
+	function isNumber(evt) {
+	    evt = (evt) ? evt : window.event;
+	    var charCode = (evt.which) ? evt.which : evt.keyCode;
+	    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+	    	alert("Must be a number");
+	        return false;
+	    }
+	    return true;
+	}
+
+	function constructBlankActionTableFromResponse(actionRows) {
+		if (getUrlVars()["id"] && !actionTableConstructed) {
+			for (var i = 0; i < actionRows.length; i++) {
+				addNewRule();
+			}
+			actionTableConstructed = true;
+		}
+	}
+
+	function startStopMachine(){
+		if(running){
+			clearInterval(timer);
+			document.getElementById("runMessage").innerHTML = "Stopped machine.";
+			document.getElementById("myButtonId").innerHTML = "Start";
+			running = false;
+		}else{
+			timer = setInterval(function() {
+				stepTheMachine();
+			}, 1000);
+			document.getElementById("myButtonId").innerHTML = "Stop";
+			running = true;
+		}
+	}
+
+	function addNewRule() {
+		var table = document.getElementById("myTable");
+		var row = table.insertRow(-1);
+		var initialState = row.insertCell(0);
+		var initialSymbol = row.insertCell(1);
+		var finalState = row.insertCell(2);
+		var finalSymbol = row.insertCell(3);
+		var moveTo = row.insertCell(4);
+		initialState.innerHTML = "<center><input type='text' onkeypress='return isNumber(event)' size='5' id="+currentRuleNumber + "_initialState "+"/></center>";
+		initialSymbol.innerHTML = "<center><input type='text' maxlength='1' size='5' id="+currentRuleNumber + "_initialSymbol "+"/></center>";
+		finalState.innerHTML = "<center><input type='text' onkeypress='return isNumber(event)' size='5' id="+currentRuleNumber + "_finalState "+"/></center>";
+		finalSymbol.innerHTML = "<center><input type='text' maxlength='1' size='5' id="+currentRuleNumber + "_finalSymbol "+"/></center>";
+		moveTo.innerHTML = "<select id="+currentRuleNumber + "_moveTo "+"><option value='R'>Right</option><option value='L'>Left</option></select>";
+		currentRuleNumber++;
+	}
+
+	function stepTheMachine() {
+		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
+		xmlhttp.open("GET", "/turningMachine/" + getUrlVars()["id"]);
+		xmlhttp.setRequestHeader("Content-Type", "application/json");
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var tape = JSON.parse(this.responseText).tape.symbols.split("");
+				var head = 1 + JSON.parse(this.responseText).head.position;
+				document.getElementById("runResult").innerHTML = "";
+				document.getElementById("runResult").appendChild(
+						getTapeHtmlToPrint(tape, head));
+				document.getElementById("runMessage").innerHTML = "Running machine...";
+				var actionRows = JSON.parse(this.responseText).actionTable.actionRows;
+				constructBlankActionTableFromResponse(actionRows);
+				paintActionTableFromResponse(actionRows);
+			} else if (this.readyState == 4 && this.status == 400) {
+				stopMachine();
+				document.getElementById("runMessage").innerHTML = "Insufficient Tape! This machine will self destruct";
+			} else if (this.readyState == 4 && this.status == 404) {
+				document.getElementById("runMessage").innerHTML = "Invalid Machine. Please refresh the page.";
+			}
+		};
+		xmlhttp.send();
+		disableScreen('input');
+		disableScreen('select');
+	}
+
+	function paintActionTableFromResponse(actionRows) {
+		for (var i = 0; i < actionRows.length; i++) {
+			document.getElementById((i + 1) + "_initialState").value = actionRows[i].initialState;
+			document.getElementById((i + 1) + "_initialSymbol").value = actionRows[i].initialSymbol;
+			document.getElementById((i + 1) + "_finalState").value = actionRows[i].finalState;
+			document.getElementById((i + 1) + "_finalSymbol").value = actionRows[i].finalSymbol;
+			document.getElementById((i + 1) + "_moveTo").value = actionRows[i].moveTo;
+		}
+		disableScreen('input');
+		disableScreen('select');
+	}
+
+	function getTapeHtmlToPrint(tape, head) {
+		var tbl = document.createElement('table');
+		tbl.setAttribute('border', '1');
+		var tbdy = document.createElement('tbody');
+
+		var tr = document.createElement('tr');
+		for (var j = 0; j < tape.length; j++) {
+			var td = document.createElement('td');
+			td.setAttribute('width', '10');
+			if (head == j + 1) {
+				td.setAttribute('bgcolor', 'Tan');
+			}
+			td.innerHTML = tape[j];
+			tr.appendChild(td);
+		}
+		tbdy.appendChild(tr);
+
+		tbl.appendChild(tbdy);
+		return tbl;
+	}
+
+	function getUrlVars() {
+		var vars = {};
+		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+				function(m, key, value) {
+					vars[key] = value;
+				});
+		return vars;
+	}
+
+	function disableScreen(tagType) {
+		var elems = document.getElementsByTagName(tagType);
+		for (var i = 0; i < elems.length; i++) {
+			elems[i].disabled = true;
+		}
+	}
+</script>
+</head>
+<body>
+	<h1>Turing Machine</h1>
+	<table id="myTable" border=1>
+		<tr>
+			<th>Initial State</th>
+			<th>Initial Symbol</th>
+			<th>Final State</th>
+			<th>Final Symbol</th>
+			<th>Direction</th>
+		</tr>
+	</table>
+	<br>
+	<div id="runResult"></div>
+	<br>
+	<div id="runMessage"></div>
+	<br>
+	<button id="myButtonId" type="button" onclick="startStopMachine()">Start</button>
+	<button id="editButtonId" type="button" onclick="editMachine()">Edit</button>
+	<script type="text/javascript">document.getElementById("myButtonId").click();</script>
+</body>
+</html>

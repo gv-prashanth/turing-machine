@@ -16,7 +16,7 @@
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 201) {
 				machineUrl = this.getResponseHeader("Location");
-				document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="startMachine()">Start</button>';
+				window.location.href = "/machine.html?id="+machineUrl.split("/")[2];
 			}
 		};
 		xmlhttp.send(constructInputJsonFromUserRules());
@@ -171,6 +171,27 @@
 			elems[i].disabled = true;
 		}
 	}
+
+	function fetchAndPopulateTheActionTable(){
+		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
+		xmlhttp.open("GET", machineUrl);
+		xmlhttp.setRequestHeader("Content-Type", "application/json");
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var actionRows = JSON.parse(this.responseText).actionTable.actionRows;
+				constructBlankActionTableFromResponse(actionRows);
+				paintActionTableFromResponse(actionRows);
+			} else if (this.readyState == 4 && this.status == 400) {
+				stopMachine();
+				document.getElementById("runMessage").innerHTML = "Insufficient Tape! This machine will self destruct";
+			} else if (this.readyState == 4 && this.status == 404) {
+				document.getElementById("runMessage").innerHTML = "Invalid Machine. Please refresh the page.";
+			}
+		};
+		xmlhttp.send();
+		disableScreen('input');
+		disableScreen('select');
+	}
 </script>
 </head>
 <body>
@@ -197,7 +218,7 @@
 	<script>
 		if (getUrlVars()["id"]) {
 			machineUrl = "/turningMachine/" + getUrlVars()["id"];
-			document.getElementById("manage").innerHTML = '<button id="myButtonId" type="button" onclick="startMachine()">Start</button>';
+			fetchAndPopulateTheActionTable();
 		} else {
 			addNewRule();
 			document.getElementById("1_initialState").value = 0;

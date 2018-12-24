@@ -189,8 +189,19 @@
 			}
 		};
 		xmlhttp.send();
-		disableScreen('input');
+		//disableScreen('input');
 		disableScreen('select');
+	}
+	
+	function openHelp(){
+	    var x = document.getElementById("help");
+	    if (x.style.display === "none") {
+	        x.style.display = "block";
+	        document.getElementById("helpbtn").value="Thanks. I undestood!";
+	    } else {
+	        x.style.display = "none";
+	        document.getElementById("helpbtn").value="Help Me Understand";
+	    }
 	}
 </script>
 </head>
@@ -208,10 +219,21 @@
 	</table>
 	<br>
 	<div id="manage">
-		<button onclick="addNewRule()">Add a Rule</button>
+		<button onclick="addNewRule()">Add a Rule</button><br><br>
 		<button type="button" onclick="createMachine()">Create</button>
+		<input type="button" id="helpbtn" type="button" onclick="openHelp()" value="Help Me Understand">
 	</div>
 	<br>
+	<div id="help" style="display:none">
+		<p>A Turing machine is a mathematical model of computation that defines an abstract machine, which manipulates symbols on a strip of tape according to a table of rules. Despite the model's simplicity, given any computer algorithm, a Turing machine capable of simulating that algorithm's logic can be constructed.</p> 
+		More precisely, a Turing machine consists of:
+		<ol>
+			<li>A tape divided into cells, one next to the other. Each cell contains a symbol from some finite alphabet.</li>
+			<li>A head that can read and write symbols on the tape and move the tape left and right one (and only one) cell at a time.</li>
+			<li>A state register that stores the state of the Turing machine, one of finitely many. These states, writes Turing, replace the "state of mind" a person performing computations would ordinarily be in.</li>
+			<li>A finite table of instructions that, given the state the machine is currently in and the symbol it is reading on the tape, tells the machine to "erase / overwrite", "move the head" & finally "assume new state".</li>
+		</ol>
+	</div>
 	<div id="runResult"></div>
 	<br>
 	<div id="runMessage"></div>

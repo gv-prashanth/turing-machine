@@ -3,7 +3,7 @@ A Turing machine implementation in Java. You can play around at <a href="#"> Tur
 
 ## Construct a Turing Machine
 ### URL
-https://turing-machine-sim.herokuapp.com/turningMachine
+<HOST>/turningMachine
 ### HttpMethod
 POST
 ### Request Body
@@ -31,7 +31,7 @@ POST
 
 ## Process the Turing Machine
 ### URL
-https://turing-machine-sim.herokuapp.com/turningMachine/{machineId}
+<HOST>/turningMachine/{machineId}
 ### HttpMethod
 GET
 ### Sample Response Body

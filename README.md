@@ -1,5 +1,5 @@
 # turning-machine
-A Turing machine implementation in Java. You can play around at <a href="https://turing-machine-sim.herokuapp.com"> Turing Machine </a>
+A Turing machine implementation in Java. You can play around at <a href="#"> Turing Machine </a>
 
 ## Construct a Turing Machine
 ### URL

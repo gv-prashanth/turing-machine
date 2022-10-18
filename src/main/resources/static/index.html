@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Turning Machine</title>
+<title>Turing Machine</title>
 <script>
 	var machineUrl = "";
 	var currentRuleNumber = 1;
@@ -11,12 +11,12 @@
 
 	function createMachine() {
 		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
-		xmlhttp.open("POST", "/turningMachine");
+		xmlhttp.open("POST", "/turingMachine");
 		xmlhttp.setRequestHeader("Content-Type", "application/json");
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 201) {
 				machineUrl = this.getResponseHeader("Location");
-				window.location.href = "/machine.html?id="+machineUrl.split("/")[2];
+				window.location.href = "/output.html?id="+machineUrl.split("/")[2];
 			}
 		};
 		xmlhttp.send(constructInputJsonFromUserRules());
@@ -27,6 +27,16 @@
 	    var charCode = (evt.which) ? evt.which : evt.keyCode;
 	    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
 	    	alert("Must be a number");
+	        return false;
+	    }
+	    return true;
+	}
+	
+	function isAlphabet(evt) {
+	    evt = (evt) ? evt : window.event;
+	    var charCode = (evt.which) ? evt.which : evt.keyCode;
+	    if (!((charCode > 96 && charCode < 123) || (charCode > 64 && charCode < 91))) {
+	    	alert("Must be a alphabet");
 	        return false;
 	    }
 	    return true;
@@ -117,6 +127,8 @@
 			document.getElementById((i + 1) + "_finalSymbol").value = actionRows[i].finalSymbol;
 			document.getElementById((i + 1) + "_moveTo").value = actionRows[i].moveTo;
 		}
+		document.getElementById("1_initialState").disabled = true;
+		document.getElementById("1_initialSymbol").disabled = true;
 	}
 
 	function getTapeHtmlToPrint(tape, head) {
@@ -149,9 +161,9 @@
 		var finalSymbol = row.insertCell(3);
 		var moveTo = row.insertCell(4);
 		initialState.innerHTML = "<center><input type='text' onkeypress='return isNumber(event)' size='5' id="+currentRuleNumber + "_initialState "+"/></center>";
-		initialSymbol.innerHTML = "<center><input type='text' maxlength='1' size='5' id="+currentRuleNumber + "_initialSymbol "+"/></center>";
+		initialSymbol.innerHTML = "<center><input type='text' onkeypress='return isAlphabet(event)' maxlength='1' size='5' id="+currentRuleNumber + "_initialSymbol "+"/></center>";
 		finalState.innerHTML = "<center><input type='text' onkeypress='return isNumber(event)' size='5' id="+currentRuleNumber + "_finalState "+"/></center>";
-		finalSymbol.innerHTML = "<center><input type='text' maxlength='1' size='5' id="+currentRuleNumber + "_finalSymbol "+"/></center>";
+		finalSymbol.innerHTML = "<center><input type='text' onkeypress='return isAlphabet(event)' maxlength='1' size='5' id="+currentRuleNumber + "_finalSymbol "+"/></center>";
 		moveTo.innerHTML = "<select id="+currentRuleNumber + "_moveTo "+"><option value='R'>Right</option><option value='L'>Left</option></select>";
 		currentRuleNumber++;
 	}
@@ -206,7 +218,7 @@
 </script>
 </head>
 <body>
-	<h1>Turing Machine</h1>
+	<h1>Turing Machine Create</h1>
 
 	<table id="myTable" border=1>
 		<tr>
@@ -239,12 +251,14 @@
 	<div id="runMessage"></div>
 	<script>
 		if (getUrlVars()["id"]) {
-			machineUrl = "/turningMachine/" + getUrlVars()["id"];
+			machineUrl = "/turingMachine/" + getUrlVars()["id"];
 			fetchAndPopulateTheActionTable();
 		} else {
 			addNewRule();
 			document.getElementById("1_initialState").value = 0;
 			document.getElementById("1_initialState").disabled = true;
+			document.getElementById("1_initialSymbol").value = '';
+			document.getElementById("1_initialSymbol").disabled = true;
 		}
 	</script>
 </body>

@@ -42,23 +42,23 @@ public class TuringMachineController {
 	 * "finalSymbol": "1", "moveTo": "R" } ] }
 	 */
 
-	@RequestMapping(method = RequestMethod.POST, value = "/turningMachine")
+	@RequestMapping(method = RequestMethod.POST, value = "/turingMachine")
 	public ResponseEntity<Map<String, String>> createTuringMachine(@RequestBody JsonNode machineInfo) {
 		try {
 			TuringMachine thisMachine = constructMachineUsingTableInfo(machineInfo);
 			String id = UUID.randomUUID().toString();
 			activeMachines.put(id, thisMachine);
 			log.info("Constructed new machine {}", id);
-			return ResponseEntity.created(new URI("/turningMachine/" + id)).build();
+			return ResponseEntity.created(new URI("/turingMachine/" + id)).build();
 		} catch (NullPointerException | URISyntaxException e) {
 			Map<String, String> toReturn = new HashMap<String, String>();
 			toReturn.put("Exception",
-					"Invalid Input. Please see sample at https://github.com/gv-prashanth/turning-machine");
+					"Invalid Input. Please see sample at https://github.com/gv-prashanth/turing-machine");
 			return ResponseEntity.badRequest().body(toReturn);
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/turningMachine/{id}")
+	@RequestMapping(method = RequestMethod.GET, value = "/turingMachine/{id}")
 	public ResponseEntity<Object> getTuringMachine(@PathVariable("id") String id) {
 		try {
 			TuringMachine thisMachine = fetchMachine(id);

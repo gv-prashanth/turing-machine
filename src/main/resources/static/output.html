@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Turning Machine</title>
+<title>Turing Machine</title>
 <script>
 	var timer;
 	var running = false;
@@ -42,7 +42,7 @@
 			timer = setInterval(function() {
 				stepTheMachine();
 			}, 1000);
-			document.getElementById("myButtonId").innerHTML = "Stop";
+			document.getElementById("myButtonId").innerHTML = "Pause";
 			running = true;
 		}
 	}
@@ -65,7 +65,7 @@
 
 	function stepTheMachine() {
 		var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance 
-		xmlhttp.open("GET", "/turningMachine/" + getUrlVars()["id"]);
+		xmlhttp.open("GET", "/turingMachine/" + getUrlVars()["id"]);
 		xmlhttp.setRequestHeader("Content-Type", "application/json");
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
@@ -105,6 +105,7 @@
 	function getTapeHtmlToPrint(tape, head) {
 		var tbl = document.createElement('table');
 		tbl.setAttribute('border', '1');
+		tbl.setAttribute('style', 'height: 25px;');
 		var tbdy = document.createElement('tbody');
 
 		var tr = document.createElement('tr');
@@ -141,7 +142,7 @@
 </script>
 </head>
 <body>
-	<h1>Turing Machine</h1>
+	<h1>Turing Machine Output</h1>
 	<table id="myTable" border=1>
 		<tr>
 			<th>Initial State</th>
